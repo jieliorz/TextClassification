@@ -1,6 +1,7 @@
 import numpy as np
 import re
 from sklearn.model_selection import train_test_split
+import random
 
 def clean_str(string):
     """
@@ -52,11 +53,11 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
     for epoch in range(num_epochs):
         # Shuffle the data at each epoch
         if shuffle:
-            shuffled_data = random.shuffle(data)
+            random.shuffle(data)
         for batch_num in range(num_batches_per_epoch):
             start_index = batch_num * batch_size
             end_index = min((batch_num + 1) * batch_size, data_size)
-            yield shuffled_data[start_index:end_index]
+            yield data[start_index:end_index]
 
 def preprocess(positive_data_file, negative_data_file):
     print("Loading data...")
