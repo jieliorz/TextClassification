@@ -117,7 +117,7 @@ class TextCNN:
 					feed_dict)
 					if step%100 == 0:
 						print('train step:{} loss:{} accuracy:{}'.format(step,loss,accuracy))
-				self.saver.save(sess,save_dir,global_step=step)
+				self.saver.save(sess,save_dir)
 
 
 	def test(self,dateset):
