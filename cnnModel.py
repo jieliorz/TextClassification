@@ -81,7 +81,7 @@ class TextCNN:
 			correct_predictions=tf.equal(self.predictions,tf.argmax(self.y_train, 1))
 			self.accuracy=tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
 
-		if self.train:
+		if self.istrain:
 			optimizer=tf.train.AdamOptimizer(self.learning_rate)
 			grads_and_vars=optimizer.compute_gradients(self.loss)
 			#返回A list of (gradient, variable) pairs

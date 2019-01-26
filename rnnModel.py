@@ -28,7 +28,7 @@ class TextRnn:
 		self.x_train = tf.placeholder(tf.int32,[None,self.input_size],name="x_train")
 		self.y_train = tf.placeholder(tf.int32,[None,self.num_classes],name='y_train')
 		self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
-
+		self.seq_lengths= tf.placeholder(tf.int32,[None])
 		self.global_step=tf.Variable(0,name='global_step',trainable=False)
 
 		with tf.name_scope('embeddings'):
@@ -43,7 +43,7 @@ class TextRnn:
 				lstm_fw_cell=tf.nn.rnn_cell.DropoutWrapper(lstm_fw_cell,output_keep_prob=self.dropout_keep_prob)
 				lstm_bw_cell=tf.nn.rnn_cell.DropoutWrapper(lstm_bw_cell,output_keep_prob=self.dropout_keep_prob)
 
-			outputs,_=tf.nn.bidirectional_dynamic_rnn(lstm_fw_cell,lstm_bw_cell,self.x_train_embedding,dtype=tf.float32)
+			outputs,_=tf.nn.bidirectional_dynamic_rnn(lstm_fw_cell,lstm_bw_cell,self.x_train_embedding,sequence_length=self.seq_lengths,dtype=tf.float32)
 			#[batch_size,sequence_length,hidden_size] #creates a dynamic bidirectional recurrent neural network
 			output_rnn=tf.concat(outputs,axis=2)#[batch_size,sequence_length,hidden_size*2] 两个tensor按照第2个维度（hidden size）连接
 			self.final_outputs=tf.reduce_sum(output_rnn,axis=1)#shape=[batch_size,2*hidden_size]按维度1(即senquence length)相加
@@ -62,7 +62,7 @@ class TextRnn:
 			correct_predictions=tf.equal(self.predictions,tf.argmax(self.y_train, 1))
 			self.accuracy=tf.reduce_mean(tf.cast(correct_predictions, "float"), name="accuracy")
 
-		if self.train:
+		if self.istrain:
 			optimizer=tf.train.AdamOptimizer(self.learning_rate)
 			grads_and_vars=optimizer.compute_gradients(self.loss)
 			#返回A list of (gradient, variable) pairs
@@ -91,7 +91,8 @@ class TextRnn:
 					feed_dict = {
 							self.x_train: x_train,
 							self.y_train: y_train,
-							self.dropout_keep_prob: self.droupout
+							self.dropout_keep_prob: self.droupout,
+							self.seq_lengths:length
 							}
 					_, step, loss, accuracy = sess.run(
 					[self.train_op, self.global_step, self.loss, self.accuracy],
@@ -118,7 +119,8 @@ class TextRnn:
 					feed_dict = {
 							self.x_train: x_train,
 							self.y_train: y_train,
-							self.dropout_keep_prob: 1
+							self.dropout_keep_prob: 1,
+							self.seq_lengths:length
 							}
 					_, _, loss, accuracy = sess.run(
 					[self.train_op, self.global_step, self.loss, self.accuracy],
